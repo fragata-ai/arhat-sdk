@@ -6,8 +6,8 @@ This repository contains a preview of documentation, tutorials, and sample code 
 ## About Arhat
 
 Arhat is a deep learning software package that converts neural network descriptions into 
-lean standalone executable code which can be directly deployed on a target platform 
-as part of a user application. This approach can provide significant benefits when 
+lean standalone executable code which can be directly deployed on various target platforms 
+as part of user applications. This approach can provide significant benefits when 
 used in embedded, cloud, and supercomputer applications because of simple and 
 straightforward deployment not requiring installation of any conventional deep learning 
 framework on the target platform. The standalone C++ code generated from the models 
