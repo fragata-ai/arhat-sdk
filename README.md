@@ -21,6 +21,7 @@ as they become available.
 The repository currently contains the following resources:
 
 * [Operator catalog](doc/op/catalog.md)
+* [Model zoo](go/src/fragata/arhat/examples/zoo/nnef)
 
 ## License
 
