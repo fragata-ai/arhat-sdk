@@ -2,9 +2,7 @@
 # Model zoo
 
 This collection of models was compiled by converting the selected models in 
-NNEF model zoo which is available here:
-
-https://github.com/KhronosGroup/NNEF-Tools/tree/master/models
+[NNEF model zoo](https://github.com/KhronosGroup/NNEF-Tools/tree/master/models)
 
 The following models are currently available:
 
