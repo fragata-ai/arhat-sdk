@@ -62,10 +62,6 @@ func CreateModel(name string) (model *models.Model, err error) {
     switch name {
     case "alexnet_caffe":
         model = AlexnetCaffe()
-    case "vgg16_caffe":
-        model = Vgg16Caffe()
-    case "vgg19_caffe":
-        model = Vgg19Caffe()
     case "googlenet_caffe":
         model = GoogleNetCaffe()
     case "inception_v1_caffe2":
