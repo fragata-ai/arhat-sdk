@@ -2,9 +2,7 @@
 # Model zoo
 
 This collection of models was compiled by converting the selected models in 
-[NNEF model zoo](https://github.com/KhronosGroup/NNEF-Tools/tree/master/models)
-
-The following models are currently available:
+[NNEF model zoo](https://github.com/KhronosGroup/NNEF-Tools/tree/master/models).
 
 ## AlexNet
 
