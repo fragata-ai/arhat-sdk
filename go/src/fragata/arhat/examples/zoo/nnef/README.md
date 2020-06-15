@@ -10,6 +10,13 @@ Name | Model | Original | NNEF
 --- | --- | --- | ---
 alexnet_caffe | BVLC AlexNet | [Caffe](https://github.com/BVLC/caffe/tree/master/models/bvlc_alexnet) | [NNEF](https://sfo2.digitaloceanspaces.com/nnef-public/bvlc_alexnet.caffemodel.nnef.tgz)
 
+## VGG
+
+Name | Model | Original | NNEF
+--- | --- | --- | ---
+vgg16_onnx | VGG-16 | [ONNX](https://s3.amazonaws.com/onnx-model-zoo/vgg/vgg16/vgg16.onnx) | [NNEF](https://sfo2.digitaloceanspaces.com/nnef-public/vgg16.onnx.nnef.tgz)
+vgg19_onnx | VGG-19 | [ONNX](https://s3.amazonaws.com/onnx-model-zoo/vgg/vgg19/vgg19.onnx) | [NNEF](https://sfo2.digitaloceanspaces.com/nnef-public/vgg19.onnx.nnef.tgz)
+
 ## GoogleNet
 
 Name | Model | Original | NNEF
