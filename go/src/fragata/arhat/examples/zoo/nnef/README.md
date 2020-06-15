@@ -46,6 +46,5 @@ Name | Model | Original | NNEF
 squeezenet_v10_caffe | SqueezeNet 1.0 | [Caffe](https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.0) | [NNEF](https://sfo2.digitaloceanspaces.com/nnef-public/squeezenet_v1.0.caffemodel.nnef.tgz)
 squeezenet_v11_caffe | SqueezeNet 1.1 | [Caffe](https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1) | [NNEF](https://sfo2.digitaloceanspaces.com/nnef-public/squeezenet_v1.1.caffemodel.nnef.tgz)
 
-  
 *NNEF and the NNEF logo are trademarks of the Khronos Group Inc.*
 
