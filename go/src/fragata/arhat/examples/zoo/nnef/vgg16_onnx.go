@@ -88,7 +88,7 @@ func Vgg16Onnx() *models.Model {
     matmul3 := m.Matmul(reshape6, variable31, "transB", true)
     add3 := m.Add(matmul3, reshape1)
     softmax1 := m.Softmax(add3, "axis", 1)
-    m.AddOutput(softmax1.OutputAt(0))
+    m.Return(softmax1, 0)
     return m
 }
 
