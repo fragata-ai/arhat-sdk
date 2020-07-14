@@ -12,13 +12,14 @@ import (
 //    Local types
 //
 
-type DownsampleFunc func(m *models.Model, x front.Layer) front.Layer 
-type NormFunc func(m *models.Model, x front.Layer, planes int) front.Layer 
+type DownsampleFunc func(m *models.Model, id string, x front.Layer) front.Layer 
+type NormFunc func(m *models.Model, id string, x front.Layer, planes int) front.Layer 
 
 type Block interface {
     Expansion() int
     Forward(
         m *models.Model,
+        id string,
         x front.Layer,
         inPlanes int,
         planes int,
@@ -35,8 +36,9 @@ type Block interface {
 //
 
 //
-//    TODO: Add pointer to "front/initializers".Initializer as optional argument;
-//        if it is not nil, construct and add initiaizers as you go
+//    Note on building initializers: 
+//    add "front/initializers.Initializer" as optional argument;
+//    if it is not nil, construct and add initiaizers as you go
 //
 
 type ResNetArgs struct {
@@ -72,7 +74,6 @@ func(a *ResNetArgs) SetNormLayer(v NormFunc) { a.normLayer = v }
 //
 
 func BuildResNet(batchSize int, block Block, layers []int, args *ResNetArgs) *models.Model {
-    resetLabelIndex()
     if args == nil {
         args = NewResNetArgs()
     }
@@ -158,8 +159,8 @@ func NewResNet(
 // interface
 
 func(p *ResNet) Forward(m *models.Model, x front.Layer) front.Layer {
-    conv1 := conv7x7(m, x, 3, p.inPlanes, 2, 3)
-    bn1 := p.normLayer(m, conv1, p.inPlanes)
+    conv1 := conv7x7(m, "conv1", x, 3, p.inPlanes, 2, 3)
+    bn1 := p.normLayer(m, "bn1", conv1, p.inPlanes)
     relu1 := m.Relu(bn1)
     maxpool := 
         m.MaxPool(
@@ -167,22 +168,61 @@ func(p *ResNet) Forward(m *models.Model, x front.Layer) front.Layer {
             "kernel", []int{3, 3}, 
             "stride", []int{2, 2}, 
             "pads", []int{1, 1, 1, 1})
-    layer1 := p.makeLayer(m, maxpool, p.block, 64, p.layers[0], 1, false)
-    layer2 := p.makeLayer(m, layer1, p.block, 128, p.layers[1], 2, p.replaceStrideWithDilation[0])
-    layer3 := p.makeLayer(m, layer2, p.block, 256, p.layers[2], 2, p.replaceStrideWithDilation[1])
-    layer4 := p.makeLayer(m, layer3, p.block, 512, p.layers[3], 2, p.replaceStrideWithDilation[2])
-    // originally nn.AdaptiveAvgPool2d
-    avgpool := m.ReduceMean(layer4, "axes", []int{2, 3})
+    layer1 := 
+        p.makeLayer(
+            m, 
+            "layer1", 
+            maxpool, 
+            p.block, 
+            64, 
+            p.layers[0], 
+            1, 
+            false)
+    layer2 := 
+        p.makeLayer(
+            m, 
+            "layer2", 
+            layer1, 
+            p.block, 
+            128, 
+            p.layers[1], 
+            2, 
+            p.replaceStrideWithDilation[0])
+    layer3 := 
+        p.makeLayer(
+            m, 
+            "layer3", 
+            layer2, 
+            p.block, 
+            256, 
+            p.layers[2], 
+            2, 
+            p.replaceStrideWithDilation[1])
+    layer4 := 
+        p.makeLayer(
+            m, 
+            "layer4", 
+            layer3, 
+            p.block, 
+            512, 
+            p.layers[3], 
+            2, 
+            p.replaceStrideWithDilation[2])
     n := 512 * p.block.Expansion()
-    reshape := m.Reshape(avgpool, "shape", []int{-1, n})
-    out := fullyConnected(m, reshape, n, p.numClasses)
+    avgpool := m.AveragePool(layer4, "globalPooling", true, "kernel", []int{1, 1})
+    out := fullyConnected(m, "fc", avgpool, n, p.numClasses)
     return out
 }
+
+//
+//    TODO: Method for building initializer
+//
 
 // implementation
 
 func(p *ResNet) makeLayer(
         m *models.Model,
+        id string,
         x front.Layer,
         block Block,
         planes int,
@@ -198,14 +238,15 @@ func(p *ResNet) makeLayer(
     }
     outPlanes := planes * block.Expansion()
     if stride != 1 || p.inPlanes != outPlanes {
-        downsample = func(m *models.Model, x front.Layer) front.Layer {
-            conv := conv1x1(m, x, p.inPlanes, outPlanes, stride)
-            return normLayer(m, conv, outPlanes)
+        downsample = func(m *models.Model, id string, x front.Layer) front.Layer {
+            conv := conv1x1(m, id+"_0", x, p.inPlanes, outPlanes, stride)
+            return normLayer(m, id+"_1", conv, outPlanes)
         }
     }
     y := 
         block.Forward(
             m, 
+            id+"_0",
             x,
             p.inPlanes,
             planes,
@@ -220,6 +261,7 @@ func(p *ResNet) makeLayer(
         y = 
             block.Forward(
                 m,
+                fmt.Sprintf("%s_%d", id, i),
                 y,
                 p.inPlanes,
                 planes,
@@ -253,6 +295,7 @@ func(b *BasicBlock) Expansion() int {
 
 func(b *BasicBlock) Forward(
         m *models.Model,
+        id string,
         x front.Layer,
         inPlanes int,
         planes int,
@@ -272,14 +315,14 @@ func(b *BasicBlock) Forward(
         normLayer = batchNorm
     }
     // Both conv1 and downsample layers downsample the input when stride != 1
-    conv1 := conv3x3(m, x, inPlanes, planes, stride, 1, 1)
-    bn1 := normLayer(m, conv1, planes)
+    conv1 := conv3x3(m, id+"_conv1", x, inPlanes, planes, stride, 1, 1)
+    bn1 := normLayer(m, id+"_bn1", conv1, planes)
     relu1 := m.Relu(bn1)
-    conv2 := conv3x3(m, relu1, planes, planes, 1, 1, 1)
-    bn2 := normLayer(m, conv2, planes)
+    conv2 := conv3x3(m, id+"_conv2", relu1, planes, planes, 1, 1, 1)
+    bn2 := normLayer(m, id+"_bn2", conv2, planes)
     identity := x
     if downsample != nil {
-        identity = downsample(m, x)
+        identity = downsample(m, id+"_downsample", x)
     }
     add := m.Add(bn2, identity)
     out := m.Relu(add)
@@ -306,6 +349,7 @@ func(b *Bottleneck) Expansion() int {
 
 func(b *Bottleneck) Forward(
         m *models.Model,
+        id string,
         x front.Layer,
         inPlanes int,
         planes int,
@@ -326,17 +370,17 @@ func(b *Bottleneck) Forward(
     }
     width := int(float32(planes) * (float32(baseWidth) / 64.0)) * groups
     // Both conv2 and downsample layers downsample the input when stride != 1
-    conv1 := conv1x1(m, x, inPlanes, width, 1)
-    bn1 := normLayer(m, conv1, width)
+    conv1 := conv1x1(m, id+"_conv1", x, inPlanes, width, 1)
+    bn1 := normLayer(m, id+"_bn1", conv1, width)
     relu1 := m.Relu(bn1)
-    conv2 := conv3x3(m, relu1, width, width, stride, groups, dilation)
-    bn2 := normLayer(m, conv2, width)
+    conv2 := conv3x3(m, id+"_conv2", relu1, width, width, stride, groups, dilation)
+    bn2 := normLayer(m, id+"_bn2", conv2, width)
     relu2 := m.Relu(bn2)
-    conv3 := conv1x1(m, relu2, width, planes*expansion, 1)
-    bn3 := normLayer(m, conv3, planes*expansion)
+    conv3 := conv1x1(m, id+"_conv3", relu2, width, planes*expansion, 1)
+    bn3 := normLayer(m, id+"_bn3", conv3, planes*expansion)
     identity := x
     if downsample != nil {
-        identity = downsample(m, x)
+        identity = downsample(m, id+"_downsample", x)
     }
     add := m.Add(bn3, identity)
     out := m.Relu(add)
@@ -347,47 +391,48 @@ func(b *Bottleneck) Forward(
 //    Local functions
 //
 
-func batchNorm(m *models.Model, x front.Layer, planes int) front.Layer {
-    labelIndex := makeLabelIndex()
+func batchNorm(m *models.Model, id string, x front.Layer, planes int) front.Layer {
     scale :=
         m.Variable(
-            "label", fmt.Sprintf("bn_weight_%d", labelIndex), 
-            "shape", []int{1, planes})
+            "label", id+"_weight", 
+            "shape", []int{planes})
     bias := 
         m.Variable(
-            "label", fmt.Sprintf("bn_bias_%d", labelIndex), 
-            "shape", []int{1, planes})
-    estMean := 
+            "label", id+"_bias", 
+            "shape", []int{planes})
+    runningMean := 
         m.Variable(
-            "label", fmt.Sprintf("bn_mean_%d", labelIndex), 
-            "shape", []int{1, planes})
-    estVar := 
+            "label", id+"_running_mean", 
+            "shape", []int{planes})
+    runningVar := 
         m.Variable(
-            "label", fmt.Sprintf("bn_var_%d", labelIndex), 
-            "shape", []int{1, planes})
+            "label", id+"_running_var", 
+            "shape", []int{planes})
     // TODO: Remove "isTest" after redesign of SpatialBn
-    return m.SpatialBn(x, scale, bias, estMean, estVar, "isTest", true)
+    return m.SpatialBn(x, scale, bias, runningMean, runningVar, "isTest", true)
 }
 
 func conv7x7(
         m *models.Model,
+        id string,
         x front.Layer,
         inPlanes int, 
         outPlanes int, 
         stride int,
         padding int) front.Layer {
-    w, b := makeConvVars(m, inPlanes, outPlanes, 7, false)
+    w := makeConvVars(m, id, inPlanes, outPlanes, 7)
     return m.Conv(
         x, 
         w, 
-        b, 
+        nil, 
         "kernel", []int{7, 7}, 
         "stride", []int{stride, stride},
         "pads", []int{padding, padding, padding, padding})
 }
 
 func conv3x3(
-        m *models.Model, 
+        m *models.Model,
+        id string,
         x front.Layer, 
         inPlanes int, 
         outPlanes int,
@@ -395,11 +440,11 @@ func conv3x3(
         groups int,
         dilation int) front.Layer {
     // 3x3 convolution with padding
-    w, b := makeConvVars(m, inPlanes, outPlanes, 3, false)
+    w := makeConvVars(m, id, inPlanes, outPlanes, 3)
     return m.Conv(
         x, 
         w, 
-        b, 
+        nil, 
         "kernel", []int{3, 3}, 
         "dilation", []int{dilation, dilation},
         "stride", []int{stride, stride},
@@ -409,60 +454,42 @@ func conv3x3(
 
 func conv1x1(
         m *models.Model, 
+        id string,
         x front.Layer, 
         inPlanes int, 
         outPlanes int,
         stride int) front.Layer {
     // 1x1 convolution
-    w, b := makeConvVars(m, inPlanes, outPlanes, 1, false)
+    w := makeConvVars(m, id, inPlanes, outPlanes, 1)
     return m.Conv(
         x, 
         w, 
-        b, 
+        nil, 
         "kernel", []int{1, 1}, 
         "stride", []int{stride, stride})
 }
 
-func fullyConnected(m *models.Model, x front.Layer, inPlanes int, outPlanes int) front.Layer {
-    labelIndex := makeLabelIndex()
+func fullyConnected(
+        m *models.Model, 
+        id string, 
+        x front.Layer, 
+        inPlanes int, 
+        outPlanes int) front.Layer {
     w := 
         m.Variable(
-            "label", fmt.Sprintf("fc_weight_%d", labelIndex), 
-            "shape", []int{outPlanes, inPlanes})
+            "label", id+"_weight", 
+            "shape", []int{outPlanes, inPlanes, 1, 1})
     b := 
         m.Variable(
-            "label", fmt.Sprintf("fc_bias_%d", labelIndex),
+            "label", id+"_bias",
             "shape", []int{outPlanes})
     return m.FullyConnected(x, w, b)
 }
 
-func makeConvVars(
-        m *models.Model, inPlanes int, outPlanes int, kernel int, bias bool) (
-            w front.Layer, b front.Layer) {
-    labelIndex := makeLabelIndex()
-    w = 
-        m.Variable(
-            "label", fmt.Sprintf("conv_weight_%d", labelIndex), 
-            "shape", []int{outPlanes, inPlanes, kernel, kernel})
-    if bias {
-        b = 
-            m.Variable(
-                "label", fmt.Sprintf("conv_bias_%d", labelIndex),
-                "shape", []int{outPlanes})
-    }
-    return
-}
-
-var nextLabelIndex = 1
-
-func resetLabelIndex() {
-    nextLabelIndex = 1
-}
-
-func makeLabelIndex() int {
-    index := nextLabelIndex
-    nextLabelIndex++
-    return index
+func makeConvVars(m *models.Model, id string, inPlanes int, outPlanes int, kernel int) front.Layer {
+    return m.Variable(
+        "label", id+"_weight", 
+        "shape", []int{outPlanes, inPlanes, kernel, kernel})
 }
 
 func fatal(err error) {

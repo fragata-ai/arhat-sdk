@@ -4,15 +4,12 @@ package main
 import (
     "fmt"
     "os"
-    emit "fragata/arhat/emit/cuda"
+    "fragata/arhat/examples/torch/util"
     "fragata/arhat/front/models"
-    graph "fragata/arhat/graph/cudnn"
 )
 
 var (
     // Configurable parameters, change if necessary
-    cudaVersion = 10200              // 10.2
-    computeCapability = [2]int{7, 5} // 7.5
     defaultOutDir = "./output"
     batchSize = 10
 )
@@ -28,13 +25,14 @@ func main() {
 func Run() error {
     var err error
     args := os.Args
-    if len(args) < 2 || len(args) > 3 {
-        return fmt.Errorf("Usage: torch_resnet modelName [outDir]\n")
+    if len(args) < 3 || len(args) > 4 {
+        return fmt.Errorf("Usage: torch_resnet platform modelName [outDir]\n")
     }
-    modelName := args[1]
+    platform := args[1]
+    modelName := args[2]
     var outDir string
-    if len(args) >= 3 {
-        outDir = args[2]
+    if len(args) >= 4 {
+        outDir = args[3]
     } else {
         outDir = defaultOutDir
     }
@@ -46,13 +44,15 @@ func Run() error {
     if err != nil {
         return err
     }
-    emitter := emit.NewEmitter(cudaVersion, computeCapability)
-    net := graph.NewGraph(emitter, emitter)
-    err = model.InferOnBatch(net, -1)
+    engine, err := util.CreateEngine(platform)
     if err != nil {
         return err
     }
-    err = emitter.Emit(net, outDir)
+    err = model.InferOnBatch(engine.Graph(), -1)
+    if err != nil {
+        return err
+    }
+    err = engine.Emit(outDir)
     if err != nil {
         return err
     }
