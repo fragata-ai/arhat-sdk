@@ -35,12 +35,6 @@ type Block interface {
 //    Optional arguments
 //
 
-//
-//    Note on building initializers: 
-//    add "front/initializers.Initializer" as optional argument;
-//    if it is not nil, construct and add initiaizers as you go
-//
-
 type ResNetArgs struct {
     numClasses int
     zeroInitResidual bool
@@ -48,7 +42,6 @@ type ResNetArgs struct {
     widthPerGroup int
     replaceStrideWithDilation []bool
     normLayer NormFunc
-    // TODO: Add object to hold initializers here
 }
 
 func NewResNetArgs() *ResNetArgs {
@@ -210,13 +203,9 @@ func(p *ResNet) Forward(m *models.Model, x front.Layer) front.Layer {
             p.replaceStrideWithDilation[2])
     n := 512 * p.block.Expansion()
     avgpool := m.AveragePool(layer4, "globalPooling", true, "kernel", []int{1, 1})
-    out := fullyConnected(m, "fc", avgpool, n, p.numClasses)
+    out := linear(m, "fc", avgpool, n, p.numClasses)
     return out
 }
-
-//
-//    TODO: Method for building initializer
-//
 
 // implementation
 
@@ -408,8 +397,7 @@ func batchNorm(m *models.Model, id string, x front.Layer, planes int) front.Laye
         m.Variable(
             "label", id+"_running_var", 
             "shape", []int{planes})
-    // TODO: Remove "isTest" after redesign of SpatialBn
-    return m.SpatialBn(x, scale, bias, runningMean, runningVar, "isTest", true)
+    return m.SpatialBn(x, scale, bias, runningMean, runningVar)
 }
 
 func conv7x7(
@@ -469,7 +457,7 @@ func conv1x1(
         "stride", []int{stride, stride})
 }
 
-func fullyConnected(
+func linear(
         m *models.Model, 
         id string, 
         x front.Layer, 
