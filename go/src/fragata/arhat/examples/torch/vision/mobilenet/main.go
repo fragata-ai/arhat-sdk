@@ -4,7 +4,7 @@ package main
 import (
     "fmt"
     "os"
-    "fragata/arhat/examples/torch/util"
+    "fragata/arhat/examples/torch/vision/util"
 )
 
 var (
