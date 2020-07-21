@@ -161,10 +161,11 @@ func InvertedResidual(
         features = branchFeatures
     } else {
         branch1 := id + "_branch1"
-        x1 = conv2d(m, branch1+"_0", x1, inp, inp, 3, stride, 1, inp)
+        x1 = conv2d(m, branch1+"_0", x, inp, inp, 3, stride, 1, inp)
         x1 = batchNorm2d(m, branch1+"_1", x1, inp)
         x1 = conv2d(m, branch1+"_2", x1, inp, branchFeatures, 1, 1, 0, 1)
         x1 = batchNorm2d(m, branch1+"_3", x1, branchFeatures)
+        x1 = m.Relu(x1)
         x2 = x
         features = inp
     }
@@ -174,6 +175,8 @@ func InvertedResidual(
     x2 = m.Relu(x2)
     x2 = conv2d(m, branch2+"_3", x2, branchFeatures, branchFeatures, 3, stride, 1, branchFeatures)
     x2 = batchNorm2d(m, branch2+"_4", x2, branchFeatures)
+    x2 = conv2d(m, branch2+"_5", x2, branchFeatures, branchFeatures, 1, 1, 0, 1)
+    x2 = batchNorm2d(m, branch2+"_6", x2, branchFeatures)
     x2 = m.Relu(x2)
     out := m.Concat(x1, x2, "axis", 1)
     out = channelShuffle(m, out, 2)
@@ -269,7 +272,7 @@ func validateInput(x interface{}) {
     case front.Layer, *front.Data:
         // ok
     default:
-        fatal(front.AssertionError("Invalid input type"))
+        fatal(front.AssertionError("Invalid input type: %T", x))
     }
 }
 

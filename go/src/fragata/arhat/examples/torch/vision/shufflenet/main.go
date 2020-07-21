@@ -61,13 +61,13 @@ func Run() error {
 
 func CreateModel(name string) (model *models.Model, err error) {
     switch name {
-    case "shufflenetv2_x0.5":
+    case "shufflenet_v2_x0_5":
         model = ShuffleNetV2x05(batchSize, nil)
-    case "shufflenetv2_x1.0":
+    case "shufflenet_v2_x1_0":
         model = ShuffleNetV2x10(batchSize, nil)
-    case "shufflenetv2_x1.5":
+    case "shufflenet_v2_x1_5":
         model = ShuffleNetV2x15(batchSize, nil)
-    case "shufflenetv2_x2.0":
+    case "shufflenet_v2_x2_0":
         model = ShuffleNetV2x20(batchSize, nil)
     default:
         err = fmt.Errorf("Invalid model name: %s", name)
