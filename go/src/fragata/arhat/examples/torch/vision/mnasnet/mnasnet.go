@@ -25,6 +25,11 @@ func NewMnasNetArgs() *MnasNetArgs {
     }
 }
 
+// interface
+
+func(a *MnasNetArgs) SetNumClasses(v int) { a.numClasses = v }
+func(a *MnasNetArgs) SetDropout(v float32) { a.dropout = v }
+
 //
 //    Model builder
 //
