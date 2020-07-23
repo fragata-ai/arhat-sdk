@@ -204,27 +204,27 @@ than SqueezeNet 1.0, without sacrificing accuracy.
 `shufflenet_v2_x0_5`
 
 >ShuffleNetV2 with 0.5x output channels, as described in the
-["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design]
-(https://arxiv.org/abs/1807.11164) paper.
+["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture 
+Design"](https://arxiv.org/abs/1807.11164) paper.
 
 `shufflenet_v2_x1_0`
 
 >ShuffleNetV2 with 1.0x output channels, as described in the
-["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"]
-(https://arxiv.org/abs/1807.11164) paper.
+["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture 
+Design"](https://arxiv.org/abs/1807.11164) paper.
 
 `shufflenet_v2_x1_5`
 
 >ShuffleNetV2 with 1.5x output channels, as described in the
-["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"]
-(https://arxiv.org/abs/1807.11164) paper. Pre-trained parameters are currently
+["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture 
+Design"](https://arxiv.org/abs/1807.11164) paper. Pre-trained parameters are currently
 not available for this variant.
 
 `shufflenet_v2_x2_0`
 
 >ShuffleNetV2 with 2.0x output channels, as described in the
-["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"]
-(https://arxiv.org/abs/1807.11164) paper. Pre-trained parameters are currently
+["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture 
+Design"](https://arxiv.org/abs/1807.11164) paper. Pre-trained parameters are currently
 not available for this variant.
 
 ### MobileNet v2
@@ -271,27 +271,27 @@ channels, and in Wide ResNet-50-2 has 2048-1024-2048.
 `mnasnet0_5`
 
 >MNASNet with depth multiplier of 0.5 from the
-["MnasNet: Platform-Aware Neural Architecture Search for Mobile]
-(https://arxiv.org/pdf/1807.11626.pdf) paper.
+["MnasNet: Platform-Aware Neural Architecture Search for 
+Mobile"](https://arxiv.org/pdf/1807.11626.pdf) paper.
 
 `mnasnet0_75`
 
 >MNASNet with depth multiplier of 0.75 from the
-["MnasNet: Platform-Aware Neural Architecture Search for Mobile]
-(https://arxiv.org/pdf/1807.11626.pdf) paper. Pre-trained parameters are currently
+["MnasNet: Platform-Aware Neural Architecture Search for 
+Mobile"](https://arxiv.org/pdf/1807.11626.pdf) paper. Pre-trained parameters are currently
 not available for this variant.
 
 `mnasnet1_0`
 
 >MNASNet with depth multiplier of 1.0 from the
-["MnasNet: Platform-Aware Neural Architecture Search for Mobile]
-(https://arxiv.org/pdf/1807.11626.pdf) paper.
+["MnasNet: Platform-Aware Neural Architecture Search for 
+Mobile](https://arxiv.org/pdf/1807.11626.pdf) paper.
 
 `mnasnet1_3`
 
 >MNASNet with depth multiplier of 1.3 from the
-["MnasNet: Platform-Aware Neural Architecture Search for Mobile]
-(https://arxiv.org/pdf/1807.11626.pdf) paper. Pre-trained parameters are currently
+["MnasNet: Platform-Aware Neural Architecture Search for 
+Mobile"](https://arxiv.org/pdf/1807.11626.pdf) paper. Pre-trained parameters are currently
 not available for this variant.
 
 ## Directory structure overview
