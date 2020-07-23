@@ -326,7 +326,7 @@ arhat-sdk
     cpp
         bin                       // executables (created by build process)
         lib                       // libraries (created by build process)
-        test                      // tests
+        prj                       // shell scripts for compilation and linking
         src                       // source code
             models                // pre-fabricated C++ code for models
                 cuda              // code for CUDA/cuDNN
@@ -334,7 +334,7 @@ arhat-sdk
             runtime               // runtime functionality common for all platforms
             runtime_cuda          // runtime functionality specific for CUDA/cuDNN 
             runtime_onednn        // runtime functionality specific for oneDNN 
-        prj                       // shell scripts for compilation and linking
+        test                      // tests
         vendor                    // third party components
             cub                   // CUB library
             onednn                // oneDNN library
@@ -424,7 +424,7 @@ For example, to build ResNet50 inference program for both platforms, use command
 ./onednn_torch_vision.bld resnet50 
 ``` 
 
-This will produce files `cuda_torch_resnet50` and `onednn_torch_50` in `cpp/lib`.
+This will produce files `cuda_torch_resnet50` and `onednn_torch_resnet50` in `cpp/lib`.
 
 Then, before running the inference programs, we shall obtain the model parameters
 and input data sets.
@@ -533,7 +533,176 @@ input data sets from the user-supplied images.
 
 ## Running the inference programs
 
+The general synopsis for running inference programs is
+
+```
+<program> --data <param_dir> --input <input_data>
+```
+
+where `<program>` a path to the program executable, `<param_dir>` is a directory containing
+parameter files, and `<input_data>` is a file containing the input data set.
+
+For example, to run inference for ResNet50 for both platforms, use commands
+
+```
+$ARHAT/cpp/bin/cuda_torch_resnet50.exe --data resnet50 --input input/husky224.dat
+$ARHAT/cpp/bin/onednn_torch_resnet50.exe --data resnet50 --input input/husky224.dat
+```
+
+It is assumed here that `cpp/test` remains your current directory. Each run will output
+the Top-3 probabilities for each input image. The outputs shall be identical for both
+target platforms. For example, in case of ResNet50 and `husky224.dat` you shall get
+
+```
+[0] class 248 prob 30.04% Eskimo dog, husky
+    class 174 prob 24.55% Norwegian elkhound, elkhound
+    class 250 prob 23.65% Siberian husky
+[1] class 250 prob 55.87% Siberian husky
+    class 248 prob 34.67% Eskimo dog, husky
+    class 176 prob  3.45% Saluki, gazelle hound
+[2] class 249 prob 76.07% malamute, malemute, Alaskan malamute
+    class 248 prob 13.23% Eskimo dog, husky
+    class 250 prob 10.30% Siberian husky
+[3] class 248 prob 56.63% Eskimo dog, husky
+    class 250 prob 28.62% Siberian husky
+    class 269 prob  5.31% timber wolf, grey wolf, gray wolf, Canis lupus
+[4] class 248 prob 52.74% Eskimo dog, husky
+    class 250 prob 28.94% Siberian husky
+    class 537 prob 17.75% dogsled, dog sled, dog sleigh
+[5] class 250 prob 52.54% Siberian husky
+    class 248 prob 34.27% Eskimo dog, husky
+    class 249 prob 11.69% malamute, malemute, Alaskan malamute
+[6] class 248 prob 49.09% Eskimo dog, husky
+    class 250 prob 37.83% Siberian husky
+    class 249 prob 10.92% malamute, malemute, Alaskan malamute
+[7] class 248 prob 47.95% Eskimo dog, husky
+    class 250 prob 33.88% Siberian husky
+    class 269 prob  9.02% timber wolf, grey wolf, gray wolf, Canis lupus
+[8] class 248 prob 58.10% Eskimo dog, husky
+    class 250 prob 39.28% Siberian husky
+    class 249 prob  1.50% malamute, malemute, Alaskan malamute
+[9] class 248 prob 52.27% Eskimo dog, husky
+    class 250 prob 44.18% Siberian husky
+    class 249 prob  2.42% malamute, malemute, Alaskan malamute
+```
+
+If you wish, you can change the metrics from Top-3 to any Top-K
+with K ranging between 1 and 5 by modifying the respective `main.cpp` file and rebuilding the program.
+(We intend to make K a command line parameter in the future.)
+
+Please not that for Inception v3 model `husky299.dat` must be used instead of `husky224.dat`.
+
+## Configuring Go toolchain
+
+The rest of this tutorial will require using Go programming language. To configure Go toolchain,
+set the `$GOPATH` environment variable:
+
+```
+export GOPATH=$ARHAT/go
+```
+
+The Go code branch has the folowing top-level structure:
+
+```
+arhat-sdk
+    go
+        bin                  // executables (created by Go build)
+        src                  // Go source code
+            fragata
+                arhat        // root for Arhat SDK source code
+        test
+```
 
 
-**TODO**: Continue from this point
+
+## Generation of platform-specific C++ code
+
+The original Arhat model descriptions in Go are located as follows:
+
+```
+arhat-sdk
+    go
+        src
+            fragata
+                arhat
+                    examples
+                        torch
+                            vision                // models ported from torchvision
+                                alexnet
+                                densenet
+                                googlenet
+                                inception
+                                mnasnet
+                                mobilenet
+                                resnet
+                                shufflenet
+                                squeezenet
+                                util
+                                vgg
+```
+
+Each subdirectory of `go/src/fragata/arhat/examples/torch/vision' except `util` contains
+Go desciption of one model family. Each description shall be compiled to a distinct
+program that can generate C++ code for any supported target platform and any variant
+of the given model family. Set `go` as you current directory, then use `go build` command
+to create generators for all model families:
+
+```
+cd $ARHAT/go
+go build -o ../bin/torch_alexnet /fragata/arhat/examples/torch/vision/alexnet
+go build -o ../bin/torch_densenet /fragata/arhat/examples/torch/vision/densenet
+go build -o ../bin/torch_googlenet /fragata/arhat/examples/torch/vision/googlenet
+go build -o ../bin/torch_inception /fragata/arhat/examples/torch/vision/inception
+go build -o ../bin/torch_mnasnet /fragata/arhat/examples/torch/vision/mnasnet
+go build -o ../bin/torch_mobilenet /fragata/arhat/examples/torch/vision/mobilenet
+go build -o ../bin/torch_resnet /fragata/arhat/examples/torch/vision/resnet
+go build -o ../bin/torch_shufflenet /fragata/arhat/examples/torch/vision/shufflenet
+go build -o ../bin/torch_squeezenet /fragata/arhat/examples/torch/vision/squeezenet
+go build -o ../bin/torch_vgg /fragata/arhat/examples/torch/vision/vgg
+``` 
+
+The general synopsis for running these generators has one of two forms depending on whether
+the given model family has only one or multiple variations. For the families with only
+one variations the command line is
+
+```
+$ARHAT/go/bin/<program> <platform> <output_dir>
+```
+
+where `<program>` is a generator name, `<platform>` is a platform identifier, and `<output_dir>` is an output
+directory where the generated code shall be placed. For example, commands
+
+```
+$ARHAT/go/bin/torch_alexnet cuda alexnet/cuda/alexnet
+$ARHAT/go/bin/torch_alexnet onednn alexnet/onednn/alexnet
+```
+
+started from `go/test` current directory will generate two standalone sets of C++ code for AlexNet and 
+CUDA and oneDNN platforms and place them in the respective directories. 
+
+For the families with multiple variations the command must include the model identifier:
+
+```
+$ARHAT/go/bin/<program> <platform> <model> <output_dir>
+```
+
+where `<model>` is a model identifier and other arguments have the same meaning as above.
+For example, commands
+
+```
+$ARHAT/go/bin/torch_resnet cuda resnet50 alexnet/cuda/resnet50
+$ARHAT/go/bin/torch_resnet onednn resnet50 alexnet/onednn/resnet50
+```
+
+will generate code for ResNet50.
+
+Note that the input batch size is fixed during compilation; the generated programs will require
+input data sets to have exactly this batch size. At present it is specified via
+the constant `batchSize` in the body of the respective `main.go` files. This constant is set
+to 10 in all examples. Edit the `main.go` files changing the `batchSize` value if you wish
+to use another batch size. (We intend to provide ability to supply the batch size as
+a command line parameter in the near future.)
+
+To build the inference programs from the generated C++ code use the same methods
+as described above for the pre-fabricated code. 
 
