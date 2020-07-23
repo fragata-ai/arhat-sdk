@@ -590,7 +590,7 @@ If you wish, you can change the metrics from Top-3 to any Top-K
 with K ranging between 1 and 5 by modifying the respective `main.cpp` file and rebuilding the program.
 (We intend to make K a command line parameter in the future.)
 
-Please not that for Inception v3 model `husky299.dat` must be used instead of `husky224.dat`.
+Please note that for Inception v3 model `husky299.dat` must be used instead of `husky224.dat`.
 
 ## Configuring Go toolchain
 
