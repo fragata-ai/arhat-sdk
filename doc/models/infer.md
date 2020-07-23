@@ -11,6 +11,40 @@ then proceed with instructions on ingesting user-supplied data sets, and
 finally will demonstrate how to use Arhat for generation of platform-specific
 C++ code from the original Go descriptions.
 
+## Pre-requisites
+
+Running examples form this tutorial requires:
+
+* Arhat SDK with valid trial or production license
+* supported OS: Windows or Linux
+* C++ compiler and development tools
+* [Go](https://golang.org/) development tools version 1.14 or higher
+* for CUDA backend: NVIDIA [CUDA Toolkit](https://developer.nvidia.com/cuda-zone)
+version 10 or higher with the compatible [cuDNN](https://developer.nvidia.com/cudnn) library
+* for CUDA backend: [CUB](https://github.com/NVlabs/cub) library version 1.8.0
+* for CUDA backend: NVIDIA GPU device supporting CUDA
+* for oneDNN backend: [oneDNN](https://github.com/oneapi-src/oneDNN) Deep Neural Network Library
+version 1.5 or higher
+* for oneDNN backend: Intel CPU or GPU device supporting oneDNN
+* for ingesting user-supplied data sets: 
+[Arhat NNEF Tools](https://github.com/fragata-ai/arhat-nnef)
+
+Examples in this tutorial assume Linux as OS. Development on Windows is conceptually similar.
+
+## Supported target platforms
+
+The following target platforms are currently supported:
+
+`cuda`
+
+> [CUDA](https://developer.nvidia.com/cuda-zone) and 
+[cuDNN](https://developer.nvidia.com/cudnn) for NVIDIA GPU devices
+
+`onednn`
+
+> [oneDNN](https://github.com/oneapi-src/oneDNN) Deep Neural Network Library
+for Intel CPU and GPU devices 
+
 ## Model nomenclature
 
 Currently we provide a collection of models implementing a wide range of
@@ -48,70 +82,70 @@ generation. The following model variants are available:
 
 `vgg11`
 
->VGG 11-layer model (configuration "A") from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf).
+>VGG 11-layer model (configuration "A") from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 `vgg11_bn`
 
->VGG 11-layer model (configuration "A") with batch normalization from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
+>VGG 11-layer model (configuration "A") with batch normalization from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 `vgg13`
 
->VGG 13-layer model (configuration "B") from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
+>VGG 13-layer model (configuration "B") from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 'vgg13_bn`
 
->VGG 13-layer model (configuration "B") from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
+>VGG 13-layer model (configuration "B") from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 `vgg16`
 
->VGG 16-layer model (configuration "D") from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
+>VGG 16-layer model (configuration "D") from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 `vgg16_bn`
 
->VGG 16-layer model (configuration "D") with batch normalization from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
+>VGG 16-layer model (configuration "D") with batch normalization from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 `vgg19`
 
->VGG 19-layer model (configuration "E") from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
+>VGG 19-layer model (configuration "E") from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 `vgg19_bn`
 
->VGG 19-layer model (configuration "E") with batch normalization from
-["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
+>VGG 19-layer model (configuration "E") with batch normalization from the
+["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf) paper.
 
 ### ResNet
 
 `resnet18`
 
->ResNet-18 model from
-["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+>ResNet-18 model from the
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf) paper.
 
 `resnet34`
 
->ResNet-34 model from
-["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+>ResNet-34 model from the
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf) paper.
 
 `resnet50`
 
->ResNet-50 model from
-["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+>ResNet-50 model from the
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf) paper.
 
 `resnet101`
 
->ResNet-101 model from
-["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+>ResNet-101 model from the
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf) paper.
 
 `resnet152`
 
 >ResNet-152 model from
-["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf) paper.
 
 ### SqueezeNet
 
@@ -123,6 +157,29 @@ accuracy with 50x fewer parameters and <0.5MB model size"](https://arxiv.org/abs
 `squeezenet1_1`
 
 >SqueezeNet 1.1 model from the 
-[official SqueezeNet repo](https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1)
+[official SqueezeNet repo](https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1).
 SqueezeNet 1.1 has 2.4x less computation and slightly fewer parameters
 than SqueezeNet 1.0, without sacrificing accuracy.
+
+### DenseNet
+
+`densenet121`
+
+>Densenet-121 model from the
+[Densely Connected Convolutional Networks](https://arxiv.org/pdf/1608.06993.pdf) paper.
+
+`densenet161`
+
+>Densenet-161 model from the
+[Densely Connected Convolutional Networks](https://arxiv.org/pdf/1608.06993.pdf) paper.
+
+`densenet169`
+
+>Densenet-169 model from the
+["Densely Connected Convolutional Networks](https://arxiv.org/pdf/1608.06993.pdf) paper.
+
+`densenet201`
+
+>Densenet-201 model from the
+["Densely Connected Convolutional Networks"](https://arxiv.org/pdf/1608.06993.pdf) paper.
+
