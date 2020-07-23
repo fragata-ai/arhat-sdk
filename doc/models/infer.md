@@ -296,5 +296,244 @@ not available for this variant.
 
 ## Directory structure overview
 
+Top-level directories of Arhat SDK distribution have the following structure
+
+```
+arhat-sdk
+      doc         // documentation
+      cpp         // C++ code
+      data        // sample data sets
+      go          // Go code
+```
+
+We assume that the distribution root directory is `arhat-sdk`. Relative path references 
+mentioned in this document are always assumed to be resolved using this root directory
+as the base. For convenience, we set en environment variable `$ARHAT` to the absolute
+path of this directory, e.g.:
+
+```
+export ARHAT=<absolute-path>/arhat-sdk
+```
+
+where `<absolute-path>` is an absolute path of `arhat-sdk` parent directory.
+
+## Building inference programs from pre-fabricated C++ source code
+
+The C++ code branch has the following directory structure:
+
+```
+arhat-sdk
+    cpp
+        bin                       // executables (created by build process)
+        lib                       // libraries (created by build process)
+        test                      // tests
+        src                       // source code
+            models                // pre-fabricated C++ code for models
+                cuda              // code for CUDA/cuDNN
+                onednn            // code for oneDNN
+            runtime               // runtime functionality common for all platforms
+            runtime_cuda          // runtime functionality specific for CUDA/cuDNN 
+            runtime_onednn        // runtime functionality specific for oneDNN 
+        prj                       // shell scripts for compilation and linking
+        vendor                    // third party components
+            cub                   // CUB library
+            onednn                // oneDNN library
+                bin
+                include
+                lib 
+                share
+```
+
+Third party components that currently include CUB and oneDNN libraries are not included
+in the distribution. They shall be obtained from the respective sources and placed
+in the respective subtrees of `cpp/vendor`.
+
+To start building process, make `cpp/prj` your current directory:
+
+```
+cd $ARHAT/cpp/prj
+``` 
+
+Proceed with building the runtime libraries. These libraries represent very lean collections
+of helper functions. Use the respective command line scripts:
+
+```
+./runtime.bld
+./runtime_cuda.bld
+./runtime_onednn.bld
+```
+
+The respective libraries will be places in `cpp/lib`.
+
+Then continue with building inference applications for selected models and target platforms.
+The source code branches for have uniform structure for all platforms; below is the branch 
+corresponding to CUDA:
+
+```
+arhat-sdk
+    cpp
+        src
+            models
+                cuda
+                    torch
+                        vision
+                            alexnet
+                            densenet121
+                            densenet161
+                            densenet169
+                            densenet201
+                            googlenet
+                            inception_v3
+                            mnasnet0_5
+                            mnasnet1_0
+                            mobilenet_v2
+                            resnet101
+                            resnet152
+                            resnet18
+                            resnet34
+                            resnet50
+                            shufflenet_v2_x0_5
+                            shufflenet_v2_x1_0
+                            squeezenet1_0
+                            squeezenet1_1
+                            vgg11
+                            vgg11_bn
+                            vgg13
+                            vgg13_bn
+                            vgg16
+                            vgg16_bn
+                            vgg19
+                            vgg19_bn
+                onednn
+                    torch
+                        vision
+                            ...
+```
+
+Each leaf directory contains source code of the inference program for the a model
+with the respective identifier. To build these programs, use scripts `cuda_torch_vision.bld` and 
+`onednn_torch_vision.bld` for CUDA and oneDNN platforms respectively. 
+Pass the model identifier as the sole script argument.
+The scripts will produce executable files `cpp/lib' named `<platform>_torch_<model>` where
+`<platform>` is a platform identifier and `model` is a model identifier.
+
+For example, to build ResNet50 inference program for both platforms, use commands
+
+```
+./cuda_torch_vision.bld resnet50 
+./onednn_torch_vision.bld resnet50 
+``` 
+
+This will produce files `cuda_torch_resnet50` and `onednn_torch_50` in `cpp/lib`.
+
+Then, before running the inference programs, we shall obtain the model parameters
+and input data sets.
+
+## Obtaining the pre-trained model parameters
+
+Because of their significant size, the pre-trained parameters are not included in
+the Arhat SDK distribution. They can be obtained using two different methods.
+
+In both cases, make `cpp/test` your current directory:
+
+```
+cd $ARHAT/cpp/test
+```
+
+The first method downloads compressed models from the cloud, uncompresses them
+and places in the distinct subdirectories in `cpp/test`. To use this method,
+run the shell script `load_param.sh` located in `cpp/test`:
+
+```
+./load_param.sh
+```
+
+You can also extract fragments from this script to download only parameters for
+selected models.
+
+The second method extracts model parameters from the original PyTorch parameter files
+also located in the cloud. Using this method requires PyTorch installed. Run the shell
+script `extract_param.sh` located in `cpp/test`:
+
+```
+./extract_param.sh
+```
+
+This script will launch the Python program `extract_param.py` that will download
+the original PyTorch parameter files, extract parameters and convert them to
+the NNEF data format; the results will be places in the same way as with
+the first method. You can also edit `extract_param.py` to extract only parameters
+for selected models.
+
+On both cases, you shall get the following directory structure:
+
+```
+arhat-sdk
+    cpp
+        test
+            alexnet
+            densenet121
+            densenet161
+            densenet169
+            densenet201
+            googlenet
+            inception_v3_google
+            mnasnet0_5
+            mnasnet1_0
+            mobilenet_v2
+            resnet
+            resnet101
+            resnet152
+            resnet18
+            resnet34
+            resnet50
+            resnext101_32x8d
+            resnext50_32x4d
+            shufflenetv2_x0.5
+            shufflenetv2_x1.0
+            squeezenet1_0
+            squeezenet1_1
+            vgg11
+            vgg11_bn
+            vgg13
+            vgg13_bn
+            vgg16
+            vgg16_bn
+            vgg19
+            vgg19_bn
+            wide_resnet101_2
+            wide_resnet50_2
+```
+
+Note that in some cases the directory names differ from the corresponding model identifiers
+(we intend to fix this in the future).
+
+## Obtaining the input data sets
+
+We will start with pre-fabricated data sets available at `data`. These sets have been created
+from 10 arbitrarily selected husky images from the ImagaNet data set; these images can be
+found in `data/husky`. The original images have been pre-processed in a conventional way,
+that is, downsampled to the fixed size, scaled in to a range of [0, 1] and then normalized using 
+mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]. Results have been stored
+in NNEF data format repsesenting a single batch of 10 NCHW images.
+
+There are two data sets downsamples to different sizes, namely 224 x 224 and 299 x 299.
+The size 299 is shall be used for `inception_v3` input; all other models require 224.
+
+Copy the pre-fabricated models to the `cpp/test' directory:
+
+```
+mkdir input
+cp $ARHAT/data/husky224.dat ./input
+cp $ARHAT/data/husky299.dat ./input
+```
+
+We are ready to run the inference programs now. Later we will explain how to build
+input data sets from the user-supplied images.
+
+## Running the inference programs
+
+
+
 **TODO**: Continue from this point
 
