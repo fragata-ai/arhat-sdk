@@ -294,7 +294,7 @@ Mobile](https://arxiv.org/pdf/1807.11626.pdf) paper.
 Mobile"](https://arxiv.org/pdf/1807.11626.pdf) paper. Pre-trained parameters are currently
 not available for this variant.
 
-## Directory structure overview
+## Top-level directory structure
 
 Top-level directories of Arhat SDK distribution have the following structure
 
@@ -513,7 +513,7 @@ Note that in some cases the directory names differ from the corresponding model 
 We will start with pre-fabricated data sets available at `data`. These sets have been created
 from 10 arbitrarily selected husky images from the ImagaNet data set; these images can be
 found in `data/husky`. The original images have been pre-processed in a conventional way,
-that is, downsampled to the fixed size, scaled in to a range of [0, 1] and then normalized using 
+that is, downsampled to the fixed size, RGB components scaled into a range of [0, 1] and then normalized using 
 mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]. Results have been stored
 in NNEF data format repsesenting a single batch of 10 NCHW images.
 
