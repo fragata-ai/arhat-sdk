@@ -613,7 +613,69 @@ arhat-sdk
         test
 ```
 
+## Creation of input data sets from the user-supplied images
 
+It is possible to use different images as input data instead of pre-fabricated husky
+data sets. For this puspose collections of user-supplied images must be converted
+to NNEF data files. This can be done using the Arhat NNEF Toolkit. This toolkit is
+distributed separately from Arhat SDK as a 
+[free open source package](https://github.com/fragata-ai/arhat-nnef). To use this package
+with Arhat SDK, download it and manually merge its Go source code into the main
+Go source tree of Arhat SDK so that its `go/src/fragata/arhat/nnef' directory will
+be located as follows:
+
+```
+arhat-sdk
+    go
+        src
+            fragata
+                arhat
+                    nnef
+```
+
+We will need only one program from Arhat NNEF Toolkit, namely `image_to_tensor`.
+To build it, make `go` your current directory and run `go build` command
+as follows:
+
+```
+cd $ARHAT/go
+go build -o ../bin/image_to_tensor fragata/arhat/nnef/tools/image_to_tensor
+```
+
+The resulting program can convert an arbitrary number of RGB images into a single
+NNEF data file. Each source image must be stored in a separate JPEG or PNG file.
+The batch size of the output NNEF data file will be equal to the number of input
+images. (Note that the batch size of the input file must match the batch size
+specified for the inference program; see more details below.)
+
+To use this program, make `go\test` your current directory, then create a new directory
+for your custom data set, for example:
+
+```
+cd $ARHAT/go/test
+mkdir mydata
+cd mydata
+```
+
+Let's start with creation of NNEF input data files from the supplied husky image set.
+This should yield data files identical to pre-fabricated `husky224.dat` and `husky299.dat`.
+Copy the original images from `data` directory and run `image_to_tensor` as follows:
+
+```
+cp -R $ARHAT/data/husky .
+$ARHAT/go/bin/image_to_tensor husky --output husky224.dat --size 224 224 --range 0 1 --mean 0.485 0.456 0.406 --std 0.229 0.224 0.225
+$ARHAT/go/bin/image_to_tensor husky --output husky299.dat --size 299 299 --range 0 1 --mean 0.485 0.456 0.406 --std 0.229 0.224 0.225
+```
+
+Here the first command line argument `husky` specified a directory containing input image files.
+
+Now you can run inference programs with the produced data files; it may yield the same results as for 
+the pre-fabricated data.
+
+As the next steps, you can replace the original husky images with any images of your choice and
+run inference for the resulting files. Please note that, unless you change the batch size in your inference
+programs as described below, you should supply 10 input images so that `image_to_tensor` will
+produce data files with the matching batch size. 
 
 ## Generation of platform-specific C++ code
 
