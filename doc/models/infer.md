@@ -24,7 +24,7 @@ The following model faimilies are included in this collection:
 * [AlexNet](https://arxiv.org/abs/1404.5997)
 * [VGG](https://arxiv.org/abs/1409.1556)
 * [ResNet](https://arxiv.org/abs/1512.03385)
-* [SqueezeNet[](https://arxiv.org/abs/1602.07360)
+* [SqueezeNet](https://arxiv.org/abs/1602.07360)
 * [DenseNet](https://arxiv.org/abs/1608.06993)
 * [Inception](https://arxiv.org/abs/1512.00567) v3
 * [GoogLeNet](https://arxiv.org/abs/1409.4842)
@@ -86,3 +86,43 @@ generation. The following model variants are available:
 >VGG 19-layer model (configuration "E") with batch normalization from
 ["Very Deep Convolutional Networks For Large-Scale Image Recognition"](https://arxiv.org/pdf/1409.1556.pdf)
 
+### ResNet
+
+`resnet18`
+
+>ResNet-18 model from
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+
+`resnet34`
+
+>ResNet-34 model from
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+
+`resnet50`
+
+>ResNet-50 model from
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+
+`resnet101`
+
+>ResNet-101 model from
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+
+`resnet152`
+
+>ResNet-152 model from
+["Deep Residual Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385.pdf)
+
+### SqueezeNet
+
+`squeezenet1_0`
+
+>SqueezeNet model architecture from the ["SqueezeNet: AlexNet-level
+accuracy with 50x fewer parameters and <0.5MB model size"](https://arxiv.org/abs/1602.07360) paper.
+
+`squeezenet1_1`
+
+>SqueezeNet 1.1 model from the 
+[official SqueezeNet repo](https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1)
+SqueezeNet 1.1 has 2.4x less computation and slightly fewer parameters
+than SqueezeNet 1.0, without sacrificing accuracy.
