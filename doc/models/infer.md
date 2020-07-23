@@ -28,6 +28,8 @@ version 1.5 or higher
 * for oneDNN backend: Intel CPU or GPU device supporting oneDNN
 * for ingesting user-supplied data sets: 
 [Arhat NNEF Tools](https://github.com/fragata-ai/arhat-nnef)
+* for extracting weights from torchvision model files:
+[PyTorch](https://github.com/pytorch/pytorch) version 1.5.0 or higher
 
 Examples in this tutorial assume Linux as OS. Development on Windows is conceptually similar.
 
