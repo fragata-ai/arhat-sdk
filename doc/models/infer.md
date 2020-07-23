@@ -414,7 +414,7 @@ Each leaf directory contains source code of the inference program for the a mode
 with the respective identifier. To build these programs, use scripts `cuda_torch_vision.bld` and 
 `onednn_torch_vision.bld` for CUDA and oneDNN platforms respectively. 
 Pass the model identifier as the sole script argument.
-The scripts will produce executable files `cpp/lib' named `<platform>_torch_<model>` where
+The scripts will produce executable files `cpp/lib` named `<platform>_torch_<model>` where
 `<platform>` is a platform identifier and `model` is a model identifier.
 
 For example, to build ResNet50 inference program for both platforms, use commands
