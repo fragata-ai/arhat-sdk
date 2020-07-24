@@ -191,7 +191,7 @@ than SqueezeNet 1.0, without sacrificing accuracy.
 `inception_v3`
 
 >Inception v3 model architecture from the
-["Rethinking the Inception Architecture for Computer Vision"](http://arxiv.org/abs/1512.00567>) paper.
+["Rethinking the Inception Architecture for Computer Vision"](http://arxiv.org/abs/1512.00567) paper.
 
 ### GoogLeNet
 
