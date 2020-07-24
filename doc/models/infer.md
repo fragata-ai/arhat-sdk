@@ -11,7 +11,7 @@ then proceed with instructions on ingesting user-supplied data sets, and
 finally will demonstrate how to use Arhat for generation of platform-specific
 C++ code from the original Go descriptions.
 
-## Pre-requisites
+## Prerequisites
 
 Running examples form this tutorial requires:
 
@@ -78,7 +78,8 @@ generation. The following model variants are available:
 
 `alexnet`
 
->AlexNet model architecture from the ["One weird trick..."](https://arxiv.org/abs/1404.5997>) paper. 
+>AlexNet model architecture from the ["One weird trick for parallelizing convolutional neural 
+networks"](https://arxiv.org/abs/1404.5997) paper. 
 
 ### VGG
 
@@ -520,7 +521,7 @@ in NNEF data format repsesenting a single batch of 10 NCHW images.
 There are two data sets downsamples to different sizes, namely 224 x 224 and 299 x 299.
 The size 299 is shall be used for `inception_v3` input; all other models require 224.
 
-Copy the pre-fabricated models to the `cpp/test' directory:
+Copy the pre-fabricated models to the `cpp/test` directory:
 
 ```
 mkdir input
@@ -610,7 +611,7 @@ arhat-sdk
         src                  // Go source code
             fragata
                 arhat        // root for Arhat SDK source code
-        test
+        test                 // tests
 ```
 
 ## Creation of input data sets from the user-supplied images
@@ -621,7 +622,7 @@ to NNEF data files. This can be done using the Arhat NNEF Toolkit. This toolkit 
 distributed separately from Arhat SDK as a 
 [free open source package](https://github.com/fragata-ai/arhat-nnef). To use this package
 with Arhat SDK, download it and manually merge its Go source code into the main
-Go source tree of Arhat SDK so that its `go/src/fragata/arhat/nnef' directory will
+Go source tree of Arhat SDK so that its `go/src/fragata/arhat/nnef` directory will
 be located as follows:
 
 ```
@@ -648,7 +649,7 @@ The batch size of the output NNEF data file will be equal to the number of input
 images. (Note that the batch size of the input file must match the batch size
 specified for the inference program; see more details below.)
 
-To use this program, make `go\test` your current directory, then create a new directory
+To use this program, make `go/test` your current directory, then create a new directory
 for your custom data set, for example:
 
 ```
@@ -703,7 +704,7 @@ arhat-sdk
                                 vgg
 ```
 
-Each subdirectory of `go/src/fragata/arhat/examples/torch/vision' except `util` contains
+Each subdirectory of `go/src/fragata/arhat/examples/torch/vision` except `util` contains
 Go desciption of one model family. Each description shall be compiled to a distinct
 program that can generate C++ code for any supported target platform and any variant
 of the given model family. Set `go` as you current directory, then use `go build` command
