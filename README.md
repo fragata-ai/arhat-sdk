@@ -23,7 +23,7 @@ The repository currently contains the following resources:
 * [Operator catalog](doc/op/catalog.md)
 * [Models ported from NNEF model zoo](go/src/fragata/arhat/examples/zoo/nnef)
 * [Models ported from torchvision](go/src/fragata/arhat/examples/torch/vision)
-* [Tutorial: Getting started with Arhat models](doc/op/infer.md)
+* [Tutorial: Getting started with Arhat models](doc/models/infer.md)
 
 ## License
 
